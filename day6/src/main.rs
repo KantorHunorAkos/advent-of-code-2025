@@ -28,6 +28,7 @@ impl PartialEq<Operator> for &str {
 struct Problem {
     op: Operator,
     operands: Vec<u64>,
+    operands_part2: Vec<u64>,
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -54,7 +55,7 @@ impl FromStr for Operator {
 }
 
 fn main() {
-    let data = match read_to_string("inputs/test_data.txt") {
+    let data = match read_to_string("inputs/data.txt") {
         Ok(v) => v,
         Err(e) => {
             eprintln!(
@@ -85,6 +86,7 @@ fn main() {
                 problems.push(Problem {
                     op: Operator::None,
                     operands: vec![],
+                    operands_part2: vec![],
                 });
                 problems[i].operands.push(line[i].parse::<u64>().unwrap());
             }
@@ -103,6 +105,53 @@ fn main() {
             acc + match p.op {
                 Operator::Add => p.operands.iter().fold(0, |acc, x| acc + x),
                 Operator::Multiply => p.operands.iter().fold(1, |acc, x| acc * x),
+                Operator::None => {
+                    eprintln!("{} unknown operation", "Error:".red().bold(),);
+                    std::process::exit(1);
+                }
+            }
+        })
+    );
+
+    let operand_count = data.lines().count() - 1;
+    let mut str_numbers: Vec<Vec<char>> = vec![];
+    let mut i = 0;
+    data.lines().for_each(|l| {
+        if i == operand_count {
+            return;
+        }
+        i += 1;
+        let mut line = vec![];
+        l.chars().into_iter().for_each(|c| {
+            line.push(c);
+        });
+        str_numbers.push(line);
+    });
+
+    let mut index = 0;
+    for col in 0..str_numbers[0].len() {
+        let mut number: String = "".to_string();
+
+        for row in 0..operand_count {
+            number.push(str_numbers[row][col]);
+        }
+
+        let number = number.trim();
+        if number.is_empty() {
+            index += 1;
+            continue;
+        }
+
+        problems[index].operands_part2.push(number.parse().unwrap());
+    }
+
+    println!(
+        "{} {}",
+        "Solution part two:".green().bold(),
+        problems.iter().fold(0, |acc, p| {
+            acc + match p.op {
+                Operator::Add => p.operands_part2.iter().fold(0, |acc, x| acc + x),
+                Operator::Multiply => p.operands_part2.iter().fold(1, |acc, x| acc * x),
                 Operator::None => {
                     eprintln!("{} unknown operation", "Error:".red().bold(),);
                     std::process::exit(1);
