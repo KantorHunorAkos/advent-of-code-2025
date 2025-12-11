@@ -37,7 +37,7 @@ impl PartialEq<Token> for char {
 }
 
 fn main() {
-    let mut data = match read_to_string("inputs/test_data.txt") {
+    let mut data = match read_to_string("inputs/data.txt") {
         Ok(v) => v
             .lines()
             .map(|l| {
@@ -76,7 +76,7 @@ fn main() {
 
     let mut split_count = 0;
     for row in 2..data[0].len() - 1 {
-        for col in 1..data[row].len() - 2 {
+        for col in 1..data[row].len() - 1 {
             if data[row][col] == Token::Splitter && data[row - 1][col] == Token::Beam {
                 split_count += 1;
                 data[row][col - 1] = Token::Beam;
@@ -91,22 +91,22 @@ fn main() {
 
     println!("{} {}", "Solution part one:".green().bold(), split_count);
 
-    let mut time: Vec<Vec<u64>> = vec![vec![0; data[0].len()]; data.len()];
-    time[0][starting_point] = 1;
+    let mut time: Vec<u64> = vec![0; data[0].len()];
+    time[starting_point] = 1;
 
-    for row in (2..time[0].len() - 1).step_by(2) {
-        for col in 1..time[row].len() - 2 {
-            if data[row][col] == Token::Beam {
-                time[row][col] =
-                    time[row - 2][col - 1] + time[row - 2][col] + time[row - 2][col + 1];
+    for row in (0..data.len()).step_by(2) {
+        for col in 1..data[row].len() - 1 {
+            if data[row][col] == Token::Splitter {
+                time[col + 1] += time[col];
+                time[col - 1] += time[col];
+                time[col] = 0;
             }
         }
-        println!("{:?}", time[row]);
     }
 
     println!(
         "{} {:?}",
         "Solution part two:".green().bold(),
-        time[time.len() - 2].iter().sum::<u64>()
+        time.iter().sum::<u64>()
     );
 }
